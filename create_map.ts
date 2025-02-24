@@ -4,10 +4,6 @@ export type Cell = { cordinates: Pair<number, number> , property: String, biome:
 export type Map = Array<Array<Cell>>;
 
 
-
-const wanted_size_x = 5;
-const wanted_size_y = 5;
-
 export function create_map(size_x: number, size_y: number): Map {
     let my_map: Map = []
     for (let y = 0; y < size_y; y++) {
