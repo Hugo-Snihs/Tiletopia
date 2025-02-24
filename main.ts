@@ -1,6 +1,7 @@
 import { create_map, Cell, Map } from './create_map';
 import { pair, Pair } from './lib/list';
 
+import * as promptSync from 'prompt-sync';
 
 
 function display_map(map: Map): void {
@@ -20,6 +21,10 @@ function main(): void {
     let game_running: boolean = true;
     while (game_running) {
         display_map(my_map);
+        const prompt = promptSync();
+        const answer = prompt('testprompt skriv vadsomhelst: ');
+        console.log(`Du skrev: ${answer}!`);
+
         break; //spelet här, inputs?
     }
 }

@@ -1,0 +1,29 @@
+{
+  "name": "pkdprojekt",
+  "version": "1.0.0",
+  "main": "main.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hugo-Snihs/PkDProjekt.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hugo-Snihs/PkDProjekt/issues"
+  },
+  "homepage": "https://github.com/Hugo-Snihs/PkDProjekt#readme",
+  "description": "",
+  "dependencies": {
+    "prompt-sync": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/prompt-sync": "^4.2.3"
+  }
+}
