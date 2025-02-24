@@ -19,4 +19,3 @@ export function create_map(size_x: number, size_y: number): Map {
     return my_map
 }
 
-console.log(create_map(wanted_size_x, wanted_size_y));
