@@ -17,16 +17,16 @@ export function create_map(size_x: number, size_y: number): Map {
 }
 
 
-function change_property(map: Map, coords: Coordinates, property: string): void {
+export function change_property(map: Map, coords: Coordinates, property: string): void {
     map[tail(coords)][head(coords)].property = property;
 }
-function change_biome(map: Map, coords: Coordinates, biome: string): void {
+export function change_biome(map: Map, coords: Coordinates, biome: string): void {
     map[tail(coords)][head(coords)].biome = biome;
 }
-function get_property(map: Map, coords: Coordinates): String {
+export function get_property(map: Map, coords: Coordinates): String {
     return map[tail(coords)][head(coords)].property;
 }
-function get_biome(map: Map, coords: Coordinates): String {
+export function get_biome(map: Map, coords: Coordinates): String {
     return map[tail(coords)][head(coords)].biome;
 }
 

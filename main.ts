@@ -1,4 +1,4 @@
-import { create_map, Cell, Map } from './create_map';
+import { create_map, Cell, Map, get_property, change_property} from './maps';
 import { pair, Pair } from './lib/list';
 
 import * as promptSync from 'prompt-sync';
@@ -19,13 +19,21 @@ function main(): void {
     const size_y = 5;
     let my_map = create_map(size_x, size_y);
     let game_running: boolean = true;
+            
+    const prompt = promptSync();
+
+
     while (game_running) {
         display_map(my_map);
-        const prompt = promptSync();
-        const answer = prompt('testprompt skriv vadsomhelst: ');
-        console.log(`Du skrev: ${answer}!`);
 
-        break; //spelet här, inputs?
+        const user_coordinates = prompt('Enter coordinate of choosing: ');
+        const user_building = prompt('Enter your building of choosing: ');
+
+        const [x, y] = user_coordinates.split(',').map(Number);
+
+        change_property(my_map, pair(x, y), user_building[0].toUpperCase());
+
+        console.log(`You have built a ${user_building} at coordinate ${user_coordinates}!`);
     }
 }
 
