@@ -1,4 +1,13 @@
 "use strict";
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var maps_1 = require("./maps");
 var list_1 = require("./lib/list");
@@ -15,7 +24,7 @@ function display_map(map) {
         console.log(row);
     }
 }
-function adjacent_tiles(_a) {
+function neighboring_tiles(map, _a) {
     var x = _a[0], y = _a[1];
     var adjacent_tiles = [
         x + 1 < size_x ? (0, list_1.pair)(x + 1, y) : null,
@@ -24,6 +33,12 @@ function adjacent_tiles(_a) {
         y - 1 >= 0 ? (0, list_1.pair)(x, y - 1) : null,
     ].filter(function (n) { return n !== null; }); //Kollar så att närliggande tiles är inom gränserna av spelet,
     //tar bort dem som ej är det(null).
+    for (var i = 0; i < adjacent_tiles.length; i++) {
+        if ((0, maps_1.get_property)(map, adjacent_tiles[i]) === "R") {
+            adjacent_tiles = Array.from(new Set(__spreadArray(__spreadArray([], adjacent_tiles, true), neighboring_tiles(map, adjacent_tiles[i]), true)));
+            //^^ Om tile A är granne med tile B, och tile B är en väg, så kommer tile A också vara granne med alla tiles som tile B är granne med.
+        }
+    }
     return adjacent_tiles;
 }
 //Räknar totala poängen på kartan. Hus ger ett poäng för varje närliggande hus (så ett ensamt hus ger 0 poäng).
@@ -31,16 +46,20 @@ function count_total_points(map) {
     var points = 0;
     for (var y = 0; y < map.length; y++) {
         for (var x = 0; x < map[y].length; x++) {
-            if (map[y][x].property === "H") {
+            var current_property = (0, maps_1.get_property)(map, (0, list_1.pair)(x, y));
+            if (current_property === "H") {
                 points += count_points_house(map, (0, list_1.pair)(x, y));
+            }
+            else if (current_property === "C") {
+                points += count_points_church(map, (0, list_1.pair)(x, y));
             }
         }
     }
     return points;
 }
-function count_points_house(map, _a) {
+function count_points_church(map, _a) {
     var x = _a[0], y = _a[1];
-    var adjacent_cells = adjacent_tiles([x, y]);
+    var adjacent_cells = neighboring_tiles(map, [x, y]);
     var neighbors = 0;
     for (var _i = 0, adjacent_cells_1 = adjacent_cells; _i < adjacent_cells_1.length; _i++) {
         var neighbor = adjacent_cells_1[_i];
@@ -48,7 +67,12 @@ function count_points_house(map, _a) {
             neighbors += 1;
         }
     }
-    return neighbors;
+    var points = neighbors;
+    return points;
+}
+function count_points_house(map, _a) {
+    var x = _a[0], y = _a[1];
+    return 1;
 }
 function main() {
     var game_map = (0, maps_1.create_map)(size_x, size_y);
@@ -57,8 +81,11 @@ function main() {
     var game_points = 0;
     var prompt = promptSync();
     var building_queue = (0, queue_array_1.empty)(); //skapar en kö för byggnader att placera.
+    (0, queue_array_1.enqueue)("House", building_queue); //detta kan vi ändra till något slumpgenererat.
+    (0, queue_array_1.enqueue)("Church", building_queue); // --||--
+    (0, queue_array_1.enqueue)("Road", building_queue); // --||--
     for (var x = 0; x < 30; x++) {
-        (0, queue_array_1.enqueue)("House", building_queue); //detta kan vi ändra till något slumpgenererat.
+        (0, queue_array_1.enqueue)("House", building_queue); // --||--
     }
     while (game_running) {
         display_map(game_map);
