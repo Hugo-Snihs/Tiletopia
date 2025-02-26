@@ -33,9 +33,16 @@ function neighboring_tiles(map, _a) {
         y - 1 >= 0 ? (0, list_1.pair)(x, y - 1) : null,
     ].filter(function (n) { return n !== null; }); //Kollar så att närliggande tiles är inom gränserna av spelet,
     //tar bort dem som ej är det(null).
-    for (var i = 0; i < adjacent_tiles.length; i++) {
-        if ((0, maps_1.get_property)(map, adjacent_tiles[i]) === "R") {
-            adjacent_tiles = Array.from(new Set(__spreadArray(__spreadArray([], adjacent_tiles, true), neighboring_tiles(map, adjacent_tiles[i]), true)));
+    return adjacent_tiles;
+}
+function neighboring_tiles_including_roads(map //Lite buggig, tror den returnerar dubletter.
+, _a, visited) {
+    var x = _a[0], y = _a[1];
+    var adjacent_tiles = neighboring_tiles(map, [x, y]);
+    for (var i = 0; i < adjacent_tiles.length; i++) { //går igenom alla närliggande tiles och kollar om de är vägar.
+        if ((0, maps_1.get_property)(map, adjacent_tiles[i]) === "R" && !visited.has(adjacent_tiles[i].toString())) { //är vägar och ej besökta än.
+            visited.add(adjacent_tiles[i].toString());
+            adjacent_tiles = Array.from(new Set(__spreadArray(__spreadArray([], adjacent_tiles, true), neighboring_tiles_including_roads(map, adjacent_tiles[i], visited), true))); //ett försök att "merga" två arrays och ta bort dubletter men tror kanske det är detta som inte funkar.
             //^^ Om tile A är granne med tile B, och tile B är en väg, så kommer tile A också vara granne med alla tiles som tile B är granne med.
         }
     }
@@ -45,7 +52,7 @@ function neighboring_tiles(map, _a) {
 function count_total_points(map) {
     var points = 0;
     for (var y = 0; y < map.length; y++) {
-        for (var x = 0; x < map[y].length; x++) {
+        for (var x = 0; x < map[y].length; x++) { //nested loops, går igenom varje tile i kartan och räknar poängen.
             var current_property = (0, maps_1.get_property)(map, (0, list_1.pair)(x, y));
             if (current_property === "H") {
                 points += count_points_house(map, (0, list_1.pair)(x, y));
@@ -59,7 +66,7 @@ function count_total_points(map) {
 }
 function count_points_church(map, _a) {
     var x = _a[0], y = _a[1];
-    var adjacent_cells = neighboring_tiles(map, [x, y]);
+    var adjacent_cells = neighboring_tiles_including_roads(map, [x, y], new Set());
     var neighbors = 0;
     for (var _i = 0, adjacent_cells_1 = adjacent_cells; _i < adjacent_cells_1.length; _i++) {
         var neighbor = adjacent_cells_1[_i];
@@ -83,6 +90,7 @@ function main() {
     var building_queue = (0, queue_array_1.empty)(); //skapar en kö för byggnader att placera.
     (0, queue_array_1.enqueue)("House", building_queue); //detta kan vi ändra till något slumpgenererat.
     (0, queue_array_1.enqueue)("Church", building_queue); // --||--
+    (0, queue_array_1.enqueue)("Road", building_queue); // --||--
     (0, queue_array_1.enqueue)("Road", building_queue); // --||--
     for (var x = 0; x < 30; x++) {
         (0, queue_array_1.enqueue)("House", building_queue); // --||--
