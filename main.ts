@@ -1,9 +1,10 @@
+/// <reference lib="es2015" /> 
 import { 
     create_map, get_property, change_property
     , Cell, Coordinates, Map 
 } from './maps';
 import { pair, Pair, list, list_ref } from './lib/list';
-import { is_empty, empty, enqueue, dequeue, head} from './lib/queue_array';
+import { is_empty, empty, enqueue, dequeue, head, Queue} from './lib/queue_array';
 
 import * as promptSync from 'prompt-sync';
 
@@ -30,6 +31,26 @@ function neighboring_tiles(map: Map, [x, y]: Coordinates): Array<Coordinates> {
     return adjacent_tiles; 
 }
 
+//Sätter ihop två arrays och tar bort dubletter. Ordningen spelar ingen roll.
+function merge_arrays(arr1: Array<Coordinates>, arr2: Array<Coordinates>): Array<Coordinates> {
+    const length1 = arr1.length;
+    const length2 = arr2.length;
+    for (let i = 0; i < length1; i++) { //Tar bort dubletter
+        for (let j = 0; j < length2; j++) {
+            if (arr1[i].toString() === arr2[j].toString()) {
+                arr2[j] = pair(-1, -1); //gör dubletter till en ogiltig koordinat i arr2
+            }
+        }
+    }
+    for (let i = 0; i < length2; i++) { //Lägger till giltiga element från arr2 till arr1
+        if (arr2[i].toString() !== pair(-1, -1).toString()) {
+        arr1.push(arr2[i]);
+        }
+    }
+    return arr1;
+}
+
+
 function neighboring_tiles_including_roads(map: Map //Lite buggig, tror den returnerar dubletter.
                                      , [x, y]: Coordinates
                                      , visited: Set<String>): Array<Coordinates> {
@@ -37,7 +58,7 @@ function neighboring_tiles_including_roads(map: Map //Lite buggig, tror den retu
         for (let i = 0; i < adjacent_tiles.length; i++) { //går igenom alla närliggande tiles och kollar om de är vägar.
             if (get_property(map, adjacent_tiles[i]) === "R" && !visited.has(adjacent_tiles[i].toString())) { //är vägar och ej besökta än.
                 visited.add(adjacent_tiles[i].toString());
-                adjacent_tiles = Array.from(new Set([...adjacent_tiles, ...neighboring_tiles_including_roads(map, adjacent_tiles[i], visited)])); //ett försök att "merga" två arrays och ta bort dubletter men tror kanske det är detta som inte funkar.
+                adjacent_tiles = merge_arrays(adjacent_tiles, neighboring_tiles_including_roads(map, adjacent_tiles[i], visited)); //ett försök att "merga" två arrays och ta bort dubletter men tror kanske det är detta som inte funkar.
                 //^^ Om tile A är granne med tile B, och tile B är en väg, så kommer tile A också vara granne med alla tiles som tile B är granne med.
             }
         } 
@@ -78,6 +99,19 @@ function count_points_house(map: Map, [x, y]: Coordinates): number { //Hus ger e
     return 1;
 }
 
+//Skapar en kö med byggnader som spelaren kan placera ut. Vi kan implementera en slumpgenererad kö senare.
+function create_building_queue(): Queue<string> {
+    const building_queue = empty<string>(); 
+    enqueue("House", building_queue); 
+    enqueue("Church", building_queue); 
+    enqueue("Road", building_queue); 
+    enqueue("Road", building_queue);        
+    for (let x = 0; x < 30; x++) {
+        enqueue("House", building_queue);
+    }
+    return building_queue;
+}
+
 function main(): void {
     let game_map = create_map(size_x, size_y);
     let game_running: boolean = true;
@@ -86,15 +120,7 @@ function main(): void {
             
     const prompt = promptSync();
 
-    const building_queue = empty<string>(); //skapar en kö för byggnader att placera.
-    enqueue("House", building_queue); //detta kan vi ändra till något slumpgenererat.
-    enqueue("Church", building_queue); // --||--
-    enqueue("Road", building_queue); // --||--
-    enqueue("Road", building_queue); // --||--
-    for (let x = 0; x < 30; x++) {
-        enqueue("House", building_queue); // --||--
-    }
-
+    const building_queue = create_building_queue();
 
 
     while (game_running) {

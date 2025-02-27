@@ -1,14 +1,6 @@
 "use strict";
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+/// <reference lib="es2015" /> 
 var maps_1 = require("./maps");
 var list_1 = require("./lib/list");
 var queue_array_1 = require("./lib/queue_array");
@@ -35,6 +27,24 @@ function neighboring_tiles(map, _a) {
     //tar bort dem som ej är det(null).
     return adjacent_tiles;
 }
+//Sätter ihop två arrays och tar bort dubletter. Ordningen spelar ingen roll.
+function merge_arrays(arr1, arr2) {
+    var length1 = arr1.length;
+    var length2 = arr2.length;
+    for (var i = 0; i < length1; i++) { //Tar bort dubletter
+        for (var j = 0; j < length2; j++) {
+            if (arr1[i].toString() === arr2[j].toString()) {
+                arr2[j] = (0, list_1.pair)(-1, -1);
+            }
+        }
+    }
+    for (var i = 0; i < length2; i++) { //Lägger till element från arr2 till arr1
+        if (arr2[i].toString() !== (0, list_1.pair)(-1, -1).toString()) {
+            arr1.push(arr2[i]);
+        }
+    }
+    return arr1;
+}
 function neighboring_tiles_including_roads(map //Lite buggig, tror den returnerar dubletter.
 , _a, visited) {
     var x = _a[0], y = _a[1];
@@ -42,7 +52,7 @@ function neighboring_tiles_including_roads(map //Lite buggig, tror den returnera
     for (var i = 0; i < adjacent_tiles.length; i++) { //går igenom alla närliggande tiles och kollar om de är vägar.
         if ((0, maps_1.get_property)(map, adjacent_tiles[i]) === "R" && !visited.has(adjacent_tiles[i].toString())) { //är vägar och ej besökta än.
             visited.add(adjacent_tiles[i].toString());
-            adjacent_tiles = Array.from(new Set(__spreadArray(__spreadArray([], adjacent_tiles, true), neighboring_tiles_including_roads(map, adjacent_tiles[i], visited), true))); //ett försök att "merga" två arrays och ta bort dubletter men tror kanske det är detta som inte funkar.
+            adjacent_tiles = merge_arrays(adjacent_tiles, neighboring_tiles_including_roads(map, adjacent_tiles[i], visited)); //ett försök att "merga" två arrays och ta bort dubletter men tror kanske det är detta som inte funkar.
             //^^ Om tile A är granne med tile B, och tile B är en väg, så kommer tile A också vara granne med alla tiles som tile B är granne med.
         }
     }
@@ -81,20 +91,25 @@ function count_points_house(map, _a) {
     var x = _a[0], y = _a[1];
     return 1;
 }
+//Skapar en kö med byggnader som spelaren kan placera ut. Vi kan implementera en slumpgenererad kö senare.
+function create_building_queue() {
+    var building_queue = (0, queue_array_1.empty)();
+    (0, queue_array_1.enqueue)("House", building_queue);
+    (0, queue_array_1.enqueue)("Church", building_queue);
+    (0, queue_array_1.enqueue)("Road", building_queue);
+    (0, queue_array_1.enqueue)("Road", building_queue);
+    for (var x = 0; x < 30; x++) {
+        (0, queue_array_1.enqueue)("House", building_queue);
+    }
+    return building_queue;
+}
 function main() {
     var game_map = (0, maps_1.create_map)(size_x, size_y);
     var game_running = true;
     var game_turn = 0;
     var game_points = 0;
     var prompt = promptSync();
-    var building_queue = (0, queue_array_1.empty)(); //skapar en kö för byggnader att placera.
-    (0, queue_array_1.enqueue)("House", building_queue); //detta kan vi ändra till något slumpgenererat.
-    (0, queue_array_1.enqueue)("Church", building_queue); // --||--
-    (0, queue_array_1.enqueue)("Road", building_queue); // --||--
-    (0, queue_array_1.enqueue)("Road", building_queue); // --||--
-    for (var x = 0; x < 30; x++) {
-        (0, queue_array_1.enqueue)("House", building_queue); // --||--
-    }
+    var building_queue = create_building_queue();
     while (game_running) {
         display_map(game_map);
         console.log("Day: ".concat(game_turn));
