@@ -16,6 +16,7 @@ function display_map(map) {
         console.log(row);
     }
 }
+//hittar alla närliggande (ej diagonalt) tiles till en specifik tile. Räknar inte tiles utanför kartan. Returnerar en array med koordinaterna.
 function neighboring_tiles(map, _a) {
     var x = _a[0], y = _a[1];
     var adjacent_tiles = [
@@ -27,6 +28,20 @@ function neighboring_tiles(map, _a) {
     //tar bort dem som ej är det(null).
     return adjacent_tiles;
 }
+//Samma som neighboring_tiles men räknar även tiles som är sammankopplade med vägar (och vägarna själva).
+function neighboring_tiles_including_roads(map, _a, visited) {
+    var x = _a[0], y = _a[1];
+    var adjacent_tiles = neighboring_tiles(map, [x, y]);
+    for (var i = 0; i < adjacent_tiles.length; i++) { //går igenom alla närliggande tiles och kollar om de är vägar.
+        if ((0, maps_1.get_property)(map, adjacent_tiles[i]) === "R"
+            && !visited.has(adjacent_tiles[i].toString())) { //är vägar och ej besökta än.
+            visited.add(adjacent_tiles[i].toString());
+            adjacent_tiles = merge_arrays(adjacent_tiles, neighboring_tiles_including_roads(map, adjacent_tiles[i], visited));
+            //^^ Om tile A är granne med tile B, och tile B är en väg, så kommer tile A också vara granne med alla tiles som tile B är granne med.
+        }
+    }
+    return adjacent_tiles;
+}
 //Sätter ihop två arrays och tar bort dubletter. Ordningen spelar ingen roll.
 function merge_arrays(arr1, arr2) {
     var length1 = arr1.length;
@@ -34,29 +49,16 @@ function merge_arrays(arr1, arr2) {
     for (var i = 0; i < length1; i++) { //Tar bort dubletter
         for (var j = 0; j < length2; j++) {
             if (arr1[i].toString() === arr2[j].toString()) {
-                arr2[j] = (0, list_1.pair)(-1, -1);
+                arr2[j] = (0, list_1.pair)(-1, -1); //gör dubletter till en ogiltig koordinat i arr2
             }
         }
     }
-    for (var i = 0; i < length2; i++) { //Lägger till element från arr2 till arr1
+    for (var i = 0; i < length2; i++) { //Lägger till giltiga element från arr2 till arr1
         if (arr2[i].toString() !== (0, list_1.pair)(-1, -1).toString()) {
             arr1.push(arr2[i]);
         }
     }
     return arr1;
-}
-function neighboring_tiles_including_roads(map //Lite buggig, tror den returnerar dubletter.
-, _a, visited) {
-    var x = _a[0], y = _a[1];
-    var adjacent_tiles = neighboring_tiles(map, [x, y]);
-    for (var i = 0; i < adjacent_tiles.length; i++) { //går igenom alla närliggande tiles och kollar om de är vägar.
-        if ((0, maps_1.get_property)(map, adjacent_tiles[i]) === "R" && !visited.has(adjacent_tiles[i].toString())) { //är vägar och ej besökta än.
-            visited.add(adjacent_tiles[i].toString());
-            adjacent_tiles = merge_arrays(adjacent_tiles, neighboring_tiles_including_roads(map, adjacent_tiles[i], visited)); //ett försök att "merga" två arrays och ta bort dubletter men tror kanske det är detta som inte funkar.
-            //^^ Om tile A är granne med tile B, och tile B är en väg, så kommer tile A också vara granne med alla tiles som tile B är granne med.
-        }
-    }
-    return adjacent_tiles;
 }
 //Räknar totala poängen på kartan. Hus ger ett poäng för varje närliggande hus (så ett ensamt hus ger 0 poäng).
 function count_total_points(map) {
@@ -70,6 +72,7 @@ function count_total_points(map) {
             else if (current_property === "C") {
                 points += count_points_church(map, (0, list_1.pair)(x, y));
             }
+            //Här kan vi lägga till fler else-if för fler eventuella byggnader som ger poäng.
         }
     }
     return points;
@@ -91,7 +94,7 @@ function count_points_house(map, _a) {
     var x = _a[0], y = _a[1];
     return 1;
 }
-//Skapar en kö med byggnader som spelaren kan placera ut. Vi kan implementera en slumpgenererad kö senare.
+//Skapar en kö med byggnader som spelaren kan placera ut. Vi kan implementera en slumpgenererad kö här istället.
 function create_building_queue() {
     var building_queue = (0, queue_array_1.empty)();
     (0, queue_array_1.enqueue)("House", building_queue);
@@ -111,6 +114,7 @@ function main() {
     var prompt = promptSync();
     var building_queue = create_building_queue();
     while (game_running) {
+        console.log(" ");
         display_map(game_map);
         console.log("Day: ".concat(game_turn));
         console.log("Points: ".concat(game_points));

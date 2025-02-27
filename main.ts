@@ -20,6 +20,7 @@ function display_map(map: Map): void {
         console.log(row);
     }
 }
+//hittar alla närliggande (ej diagonalt) tiles till en specifik tile. Räknar inte tiles utanför kartan. Returnerar en array med koordinaterna.
 function neighboring_tiles(map: Map, [x, y]: Coordinates): Array<Coordinates> {
     let adjacent_tiles = [
         x + 1 < size_x ? pair(x + 1, y) : null,
@@ -28,6 +29,26 @@ function neighboring_tiles(map: Map, [x, y]: Coordinates): Array<Coordinates> {
         y - 1 >= 0     ? pair(x, y - 1) : null, 
       ].filter(n => n !== null); //Kollar så att närliggande tiles är inom gränserna av spelet,
                                  //tar bort dem som ej är det(null).
+    return adjacent_tiles; 
+}
+
+//Samma som neighboring_tiles men räknar även tiles som är sammankopplade med vägar (och vägarna själva).
+function neighboring_tiles_including_roads(map: Map 
+                                            , [x, y]: Coordinates
+                                            , visited: Set<String>): Array<Coordinates> {
+    let adjacent_tiles = neighboring_tiles(map, [x, y]);
+    for (let i = 0; i < adjacent_tiles.length; i++) { //går igenom alla närliggande tiles och kollar om de är vägar.
+        if (get_property(map, adjacent_tiles[i])  === "R" 
+            && !visited.has(adjacent_tiles[i].toString())) { //är vägar och ej besökta än.
+                visited.add(adjacent_tiles[i].toString());
+                adjacent_tiles = merge_arrays(adjacent_tiles
+                                            , neighboring_tiles_including_roads(
+                                                map
+                                                , adjacent_tiles[i]
+                                                , visited)); 
+//^^ Om tile A är granne med tile B, och tile B är en väg, så kommer tile A också vara granne med alla tiles som tile B är granne med.
+        }
+    } 
     return adjacent_tiles; 
 }
 
@@ -51,20 +72,6 @@ function merge_arrays(arr1: Array<Coordinates>, arr2: Array<Coordinates>): Array
 }
 
 
-function neighboring_tiles_including_roads(map: Map //Lite buggig, tror den returnerar dubletter.
-                                     , [x, y]: Coordinates
-                                     , visited: Set<String>): Array<Coordinates> {
-    let adjacent_tiles = neighboring_tiles(map, [x, y]);
-        for (let i = 0; i < adjacent_tiles.length; i++) { //går igenom alla närliggande tiles och kollar om de är vägar.
-            if (get_property(map, adjacent_tiles[i]) === "R" && !visited.has(adjacent_tiles[i].toString())) { //är vägar och ej besökta än.
-                visited.add(adjacent_tiles[i].toString());
-                adjacent_tiles = merge_arrays(adjacent_tiles, neighboring_tiles_including_roads(map, adjacent_tiles[i], visited)); //ett försök att "merga" två arrays och ta bort dubletter men tror kanske det är detta som inte funkar.
-                //^^ Om tile A är granne med tile B, och tile B är en väg, så kommer tile A också vara granne med alla tiles som tile B är granne med.
-            }
-        } 
-    return adjacent_tiles; 
-
-}
 
     //Räknar totala poängen på kartan. Hus ger ett poäng för varje närliggande hus (så ett ensamt hus ger 0 poäng).
 function count_total_points(map: Map): number {
@@ -78,14 +85,14 @@ function count_total_points(map: Map): number {
             else if (current_property === "C") {
                 points += count_points_church(map, pair(x, y));
             }
+            //Här kan vi lägga till fler else-if för fler eventuella byggnader som ger poäng.
         }
     }
     return points;
 }
 
-function count_points_church(map: Map, [x, y]: Coordinates): number { //Räknar poäng genererat av ett specifikt hus
+function count_points_church(map: Map, [x, y]: Coordinates): number { //Räknar poäng genererat av en specifik kyrka.
     const adjacent_cells = neighboring_tiles_including_roads(map, [x, y], new Set());
-
     let neighbors = 0;
         for (let neighbor of adjacent_cells) {
             if (get_property(map, neighbor) === "H"){
@@ -95,11 +102,11 @@ function count_points_church(map: Map, [x, y]: Coordinates): number { //Räknar 
     const points = neighbors;
     return points;
 }
-function count_points_house(map: Map, [x, y]: Coordinates): number { //Hus ger ett poäng
+function count_points_house(map: Map, [x, y]: Coordinates): number { //Hus ger ett poäng styck.
     return 1;
 }
 
-//Skapar en kö med byggnader som spelaren kan placera ut. Vi kan implementera en slumpgenererad kö senare.
+//Skapar en kö med byggnader som spelaren kan placera ut. Vi kan implementera en slumpgenererad kö här istället.
 function create_building_queue(): Queue<string> {
     const building_queue = empty<string>(); 
     enqueue("House", building_queue); 
@@ -124,6 +131,7 @@ function main(): void {
 
 
     while (game_running) {
+        console.log(" ");
         display_map(game_map);
         console.log(`Day: ${game_turn}`)
         console.log(`Points: ${game_points}`)
