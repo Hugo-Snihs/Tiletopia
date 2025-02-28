@@ -10,6 +10,7 @@ import * as promptSync from 'prompt-sync';
 
 const size_x = 5;
 const size_y = 5;
+const buildings = ["House", "Church", "Road", "Lumberjack"];
 
 function display_map(map: Map): void {
     for (let y = 0; y < map.length; y++) {
@@ -106,18 +107,21 @@ function count_points_house(map: Map, [x, y]: Coordinates): number { //Hus ger e
     return 1;
 }
 
+function getRandomInt(max: number) {
+    return Math.floor(Math.random() * max);
+}
+
 //Skapar en kö med byggnader som spelaren kan placera ut. Vi kan implementera en slumpgenererad kö här istället.
-function create_building_queue(): Queue<string> {
+function create_building_queue(items: number): Queue<string> {
     const building_queue = empty<string>(); 
-    enqueue("House", building_queue); 
-    enqueue("Church", building_queue); 
-    enqueue("Road", building_queue); 
-    enqueue("Road", building_queue);        
-    for (let x = 0; x < 30; x++) {
-        enqueue("House", building_queue);
+
+    for (let i = 0; i < items; i++){
+        enqueue(buildings[getRandomInt(buildings.length)], building_queue);
     }
+    
     return building_queue;
 }
+
 
 function main(): void {
     let game_map = create_map(size_x, size_y);
@@ -127,7 +131,7 @@ function main(): void {
             
     const prompt = promptSync();
 
-    const building_queue = create_building_queue();
+    const building_queue = create_building_queue(3);
 
 
     while (game_running) {
@@ -136,9 +140,9 @@ function main(): void {
         console.log(`Day: ${game_turn}`)
         console.log(`Points: ${game_points}`)
         console.log(" ");
+        
         const current_building = head(building_queue);
-        dequeue(building_queue);
-        console.log(`Building to place: ${current_building} | Upcoming building: ${head(building_queue)}`);
+        console.log(`Building to place: ${current_building}`);
 
         const user_coordinates = prompt('Enter coordinate of choosing: ');
         const [x, y] = user_coordinates.split(',').map(Number);
@@ -147,8 +151,6 @@ function main(): void {
             continue;
         }
     
-        
-        
         change_property(game_map, pair(x, y), current_building[0].toUpperCase());
 
 
@@ -156,6 +158,9 @@ function main(): void {
         game_points = count_total_points(game_map);
 
         game_turn += 1;
+        dequeue(building_queue);
+        enqueue(buildings[getRandomInt(buildings.length)], building_queue);
+
         console.log(`-----------------------------------------`) // För synlighet i terminalen mellan dagar(turns)
     }
 }

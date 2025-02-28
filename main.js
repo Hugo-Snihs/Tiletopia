@@ -7,6 +7,7 @@ var queue_array_1 = require("./lib/queue_array");
 var promptSync = require("prompt-sync");
 var size_x = 5;
 var size_y = 5;
+var buildings = ["House", "Church", "Road", "Lumberjack"];
 function display_map(map) {
     for (var y = 0; y < map.length; y++) {
         var row = "";
@@ -94,15 +95,14 @@ function count_points_house(map, _a) {
     var x = _a[0], y = _a[1];
     return 1;
 }
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
 //Skapar en kö med byggnader som spelaren kan placera ut. Vi kan implementera en slumpgenererad kö här istället.
-function create_building_queue() {
+function create_building_queue(items) {
     var building_queue = (0, queue_array_1.empty)();
-    (0, queue_array_1.enqueue)("House", building_queue);
-    (0, queue_array_1.enqueue)("Church", building_queue);
-    (0, queue_array_1.enqueue)("Road", building_queue);
-    (0, queue_array_1.enqueue)("Road", building_queue);
-    for (var x = 0; x < 30; x++) {
-        (0, queue_array_1.enqueue)("House", building_queue);
+    for (var i = 0; i < items; i++) {
+        (0, queue_array_1.enqueue)(buildings[getRandomInt(buildings.length)], building_queue);
     }
     return building_queue;
 }
@@ -112,7 +112,7 @@ function main() {
     var game_turn = 0;
     var game_points = 0;
     var prompt = promptSync();
-    var building_queue = create_building_queue();
+    var building_queue = create_building_queue(3);
     while (game_running) {
         console.log(" ");
         display_map(game_map);
@@ -120,8 +120,7 @@ function main() {
         console.log("Points: ".concat(game_points));
         console.log(" ");
         var current_building = (0, queue_array_1.head)(building_queue);
-        (0, queue_array_1.dequeue)(building_queue);
-        console.log("Building to place: ".concat(current_building, " | Upcoming building: ").concat((0, queue_array_1.head)(building_queue)));
+        console.log("Building to place: ".concat(current_building));
         var user_coordinates = prompt('Enter coordinate of choosing: ');
         var _a = user_coordinates.split(',').map(Number), x = _a[0], y = _a[1];
         if (x < 0 || y < 0 || x >= size_x || y >= size_y || isNaN(x) || isNaN(y)) {
@@ -132,6 +131,8 @@ function main() {
         console.log("You have built a ".concat(current_building, " at coordinate ").concat(user_coordinates, "!"));
         game_points = count_total_points(game_map);
         game_turn += 1;
+        (0, queue_array_1.dequeue)(building_queue);
+        (0, queue_array_1.enqueue)(buildings[getRandomInt(buildings.length)], building_queue);
         console.log("-----------------------------------------"); // För synlighet i terminalen mellan dagar(turns)
     }
 }
