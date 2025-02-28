@@ -11,7 +11,12 @@ function create_map(size_x, size_y) {
     for (var y = 0; y < size_y; y++) {
         my_map[y] = [];
         for (var x = 0; x < size_x; x++) {
-            my_map[y][x] = { cordinates: (0, list_1.pair)(x, y), property: "E", biome: "grass" };
+            if (Math.random() < 0.1) {
+                my_map[y][x] = { cordinates: (0, list_1.pair)(x, y), property: "T", biome: "grass" };
+            }
+            else {
+                my_map[y][x] = { cordinates: (0, list_1.pair)(x, y), property: "E", biome: "grass" };
+            }
         }
     }
     return my_map;
