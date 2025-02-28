@@ -123,6 +123,26 @@ function create_building_queue(items: number): Queue<string> {
 }
 
 
+//Returnerar True om byggnaden placerats, False om inte.
+function place(map: Map, coordinates: Coordinates, building: string): boolean {
+    if (get_property(map, coordinates) === "T" && building === "Lumberjack") { //T för tree
+        change_property(map, coordinates, "E");
+        return true;
+        console.log(`You used a lumberjack to remove trees at coordinates ${coordinates}!`);
+    }
+    if (get_property(map, coordinates) === "E") {
+        change_property(map, coordinates, building[0].toUpperCase());
+        return true;
+        console.log(`You have built a ${building} at coordinates ${coordinates}!`);
+    }
+    
+    else {
+        console.log(" *** Non-empty tile. Try again. *** ");
+        return false;
+    }
+    
+}
+
 function main(): void {
     let game_map = create_map(size_x, size_y);
     let game_running: boolean = true;
@@ -130,9 +150,8 @@ function main(): void {
     let game_points = 0;
             
     const prompt = promptSync();
-
     const building_queue = create_building_queue(3);
-
+    
 
     while (game_running) {
         console.log(" ");
@@ -142,7 +161,8 @@ function main(): void {
         console.log(" ");
         
         const current_building = head(building_queue);
-        console.log(`Building to place: ${current_building}`);
+        dequeue(building_queue);
+        console.log(`Building to place: ${current_building} | Upcoming building: ${head(building_queue)}`);
 
         const user_coordinates = prompt('Enter coordinate of choosing: ');
         const [x, y] = user_coordinates.split(',').map(Number);
@@ -152,11 +172,15 @@ function main(): void {
         }
     
         change_property(game_map, pair(x, y), current_building[0].toUpperCase());
+        if (!place(game_map, pair(x, y), current_building)) {
+            continue;
+        }
+        
 
 
-        console.log(`You have built a ${current_building} at coordinate ${user_coordinates}!`);
+        
         game_points = count_total_points(game_map);
-
+        dequeue(building_queue);
         game_turn += 1;
         dequeue(building_queue);
         enqueue(buildings[getRandomInt(buildings.length)], building_queue);

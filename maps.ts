@@ -10,8 +10,13 @@ export function create_map(size_x: number, size_y: number): Map {
     for (let y = 0; y < size_y; y++) {
         my_map[y] = []
         for (let x = 0; x < size_x; x++) {
+            if (Math.random() < 0.1) {
+                my_map[y][x] = {cordinates: pair(x, y), property: "T", biome: "grass"}
+            }
+            else {
             my_map[y][x] = {cordinates: pair(x, y), property: "E", biome: "grass"}
-        }
+            }
+        }  
     }
     return my_map
 }
