@@ -106,6 +106,33 @@ function create_building_queue(items) {
     }
     return building_queue;
 }
+//Returnerar True om byggnaden placerats, False om inte.
+function place(map, coordinates, building) {
+    if (building === "Lumberjack") {
+        if ((0, maps_1.get_property)(map, coordinates) === "T") { //T för tree
+            (0, maps_1.change_property)(map, coordinates, "E");
+            console.log("You used a lumberjack to remove trees at coordinates ".concat(coordinates, "!"));
+            return true;
+        }
+        if ((0, maps_1.get_property)(map, coordinates) === "E") {
+            console.log("You gave the lumberjack a day off.");
+            return true;
+        }
+        else {
+            console.log(" *** Non-empty tile. Try again. *** ");
+            return false;
+        }
+    }
+    if ((0, maps_1.get_property)(map, coordinates) === "E") {
+        (0, maps_1.change_property)(map, coordinates, building[0].toUpperCase());
+        console.log("You have built a ".concat(building, " at coordinates ").concat(coordinates, "!"));
+        return true;
+    }
+    else {
+        console.log(" *** Non-empty tile. Try again. *** ");
+        return false;
+    }
+}
 function main() {
     var game_map = (0, maps_1.create_map)(size_x, size_y);
     var game_running = true;
@@ -120,18 +147,19 @@ function main() {
         console.log("Points: ".concat(game_points));
         console.log(" ");
         var current_building = (0, queue_array_1.head)(building_queue);
-        console.log("Building to place: ".concat(current_building));
+        console.log("Building to place: ".concat(current_building, " | Upcoming building: ").concat((0, queue_array_1.head)(building_queue)));
         var user_coordinates = prompt('Enter coordinate of choosing: ');
         var _a = user_coordinates.split(',').map(Number), x = _a[0], y = _a[1];
         if (x < 0 || y < 0 || x >= size_x || y >= size_y || isNaN(x) || isNaN(y)) {
             console.log(" *** Invalid coordinates, try again! *** ");
             continue;
         }
-        (0, maps_1.change_property)(game_map, (0, list_1.pair)(x, y), current_building[0].toUpperCase());
-        console.log("You have built a ".concat(current_building, " at coordinate ").concat(user_coordinates, "!"));
+        if (!place(game_map, (0, list_1.pair)(x, y), current_building)) {
+            continue;
+        }
         game_points = count_total_points(game_map);
-        game_turn += 1;
         (0, queue_array_1.dequeue)(building_queue);
+        game_turn += 1;
         (0, queue_array_1.enqueue)(buildings[getRandomInt(buildings.length)], building_queue);
         console.log("-----------------------------------------"); // För synlighet i terminalen mellan dagar(turns)
     }

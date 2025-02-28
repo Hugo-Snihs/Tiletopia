@@ -125,22 +125,30 @@ function create_building_queue(items: number): Queue<string> {
 
 //Returnerar True om byggnaden placerats, False om inte.
 function place(map: Map, coordinates: Coordinates, building: string): boolean {
-    if (get_property(map, coordinates) === "T" && building === "Lumberjack") { //T för tree
-        change_property(map, coordinates, "E");
-        return true;
-        console.log(`You used a lumberjack to remove trees at coordinates ${coordinates}!`);
+    if (building === "Lumberjack") {
+        if (get_property(map, coordinates) === "T") { //T för tree
+            change_property(map, coordinates, "E");
+            console.log(`You used a lumberjack to remove trees at coordinates ${coordinates}!`);
+            return true;
+        }
+        if (get_property(map, coordinates) === "E") {
+            console.log(`You gave the lumberjack a day off.`);
+            return true;
+        }
+        else {
+            console.log(" *** Non-empty tile. Try again. *** ");
+            return false;
+        }
     }
     if (get_property(map, coordinates) === "E") {
         change_property(map, coordinates, building[0].toUpperCase());
-        return true;
         console.log(`You have built a ${building} at coordinates ${coordinates}!`);
+        return true;   
     }
-    
     else {
         console.log(" *** Non-empty tile. Try again. *** ");
         return false;
     }
-    
 }
 
 function main(): void {
@@ -161,7 +169,7 @@ function main(): void {
         console.log(" ");
         
         const current_building = head(building_queue);
-        dequeue(building_queue);
+    
         console.log(`Building to place: ${current_building} | Upcoming building: ${head(building_queue)}`);
 
         const user_coordinates = prompt('Enter coordinate of choosing: ');
@@ -171,7 +179,7 @@ function main(): void {
             continue;
         }
     
-        change_property(game_map, pair(x, y), current_building[0].toUpperCase());
+        
         if (!place(game_map, pair(x, y), current_building)) {
             continue;
         }
@@ -182,7 +190,7 @@ function main(): void {
         game_points = count_total_points(game_map);
         dequeue(building_queue);
         game_turn += 1;
-        dequeue(building_queue);
+        
         enqueue(buildings[getRandomInt(buildings.length)], building_queue);
 
         console.log(`-----------------------------------------`) // För synlighet i terminalen mellan dagar(turns)
