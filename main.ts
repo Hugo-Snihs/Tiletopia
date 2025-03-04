@@ -3,14 +3,14 @@ import {
     create_map, get_property, change_property
     , Cell, Coordinates, Map 
 } from './maps';
-import { pair, Pair, list, list_ref } from './lib/list';
+import { pair, Pair, list, list_ref, List } from './lib/list';
 import { is_empty, empty, enqueue, dequeue, head, Queue} from './lib/queue_array';
 
 import * as promptSync from 'prompt-sync';
 
-const size_x = 5;
-const size_y = 5;
-const buildings = ["House", "Church", "Road", "Lumberjack"];
+const size_x: number = 5;
+const size_y: number = 5;
+const buildings: Array<string> = ["House", "Church", "Road", "Lumberjack"];
 
 function display_map(map: Map): void {
     for (let y = 0; y < map.length; y++) {
@@ -23,7 +23,7 @@ function display_map(map: Map): void {
 }
 //hittar alla närliggande (ej diagonalt) tiles till en specifik tile. Räknar inte tiles utanför kartan. Returnerar en array med koordinaterna.
 function neighboring_tiles(map: Map, [x, y]: Coordinates): Array<Coordinates> {
-    let adjacent_tiles = [
+    let adjacent_tiles: Array<Coordinates> = [
         x + 1 < size_x ? pair(x + 1, y) : null,
         x - 1 >= 0     ? pair(x - 1, y) : null, 
         y + 1 < size_y ? pair(x, y + 1) : null, 
@@ -55,8 +55,8 @@ function neighboring_tiles_including_roads(map: Map
 
 //Sätter ihop två arrays och tar bort dubletter. Ordningen spelar ingen roll.
 function merge_arrays(arr1: Array<Coordinates>, arr2: Array<Coordinates>): Array<Coordinates> {
-    const length1 = arr1.length;
-    const length2 = arr2.length;
+    const length1: number = arr1.length;
+    const length2: number = arr2.length;
     for (let i = 0; i < length1; i++) { //Tar bort dubletter
         for (let j = 0; j < length2; j++) {
             if (arr1[i].toString() === arr2[j].toString()) {
@@ -76,7 +76,7 @@ function merge_arrays(arr1: Array<Coordinates>, arr2: Array<Coordinates>): Array
 
     //Räknar totala poängen på kartan. Hus ger ett poäng för varje närliggande hus (så ett ensamt hus ger 0 poäng).
 function count_total_points(map: Map): number {
-    let points = 0;
+    let points: number = 0;
     for (let y = 0; y < map.length; y++) {
         for (let x = 0; x < map[y].length; x++) { //nested loops, går igenom varje tile i kartan och räknar poängen.
             const current_property = get_property(map, pair(x, y));
@@ -93,21 +93,21 @@ function count_total_points(map: Map): number {
 }
 
 function count_points_church(map: Map, [x, y]: Coordinates): number { //Räknar poäng genererat av en specifik kyrka.
-    const adjacent_cells = neighboring_tiles_including_roads(map, [x, y], new Set());
-    let neighbors = 0;
+    const adjacent_cells: Array<Coordinates> = neighboring_tiles_including_roads(map, [x, y], new Set());
+    let neighbors: number = 0;
         for (let neighbor of adjacent_cells) {
             if (get_property(map, neighbor) === "H"){
                 neighbors += 1;
             }
         }
-    const points = neighbors;
+    const points: number = neighbors;
     return points;
 }
 function count_points_house(map: Map, [x, y]: Coordinates): number { //Hus ger ett poäng styck.
     return 1;
 }
 
-function getRandomInt(max: number) {
+function getRandomInt(max: number): number {
     return Math.floor(Math.random() * max);
 }
 
@@ -152,13 +152,13 @@ function place(map: Map, coordinates: Coordinates, building: string): boolean {
 }
 
 function main(): void {
-    let game_map = create_map(size_x, size_y);
+    let game_map: Map = create_map(size_x, size_y);
     let game_running: boolean = true;
-    let game_turn = 0;
-    let game_points = 0;
+    let game_turn: number = 0;
+    let game_points: number = 0;
             
     const prompt = promptSync();
-    const building_queue = create_building_queue(3);
+    const building_queue: Queue<string> = create_building_queue(3);
     
 
     while (game_running) {
@@ -168,12 +168,12 @@ function main(): void {
         console.log(`Points: ${game_points}`)
         console.log(" ");
         
-        const current_building = head(building_queue);
+        const current_building: string = head(building_queue);
     
-        console.log(`Building to place: ${current_building} | Upcoming building: ${head(building_queue)}`);
+        console.log(`Building to place: ${current_building}`);
 
-        const user_coordinates = prompt('Enter coordinate of choosing: ');
-        const [x, y] = user_coordinates.split(',').map(Number);
+        const user_coordinates: string = prompt('Enter coordinate of choosing: ');
+        const [x, y]: Array<number> = user_coordinates.split(',').map(Number);
         if (x < 0 || y < 0 || x >= size_x || y >= size_y || isNaN(x) || isNaN(y)) {
             console.log(" *** Invalid coordinates, try again! *** ");
             continue;

@@ -147,7 +147,7 @@ function main() {
         console.log("Points: ".concat(game_points));
         console.log(" ");
         var current_building = (0, queue_array_1.head)(building_queue);
-        console.log("Building to place: ".concat(current_building, " | Upcoming building: ").concat((0, queue_array_1.head)(building_queue)));
+        console.log("Building to place: ".concat(current_building));
         var user_coordinates = prompt('Enter coordinate of choosing: ');
         var _a = user_coordinates.split(',').map(Number), x = _a[0], y = _a[1];
         if (x < 0 || y < 0 || x >= size_x || y >= size_y || isNaN(x) || isNaN(y)) {
