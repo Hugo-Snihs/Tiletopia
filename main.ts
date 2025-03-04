@@ -122,6 +122,95 @@ function create_building_queue(items: number): Queue<string> {
     return building_queue;
 }
 
+function spawn_barbarian(map: Map): void {
+    let empty_tiles: Array<Coordinates> = [];
+
+    for(let y = 0; y < map.length; y++){
+        for(let x = 0; x < map[y].length; x++){
+            if (get_property(map, pair(x, y)) === "E") {
+                empty_tiles.push(pair(x, y));
+            }
+        }
+    }
+
+    if (empty_tiles.length > 0) {
+        const spawn_point = empty_tiles[getRandomInt(empty_tiles.length)];
+        change_property(map, spawn_point, "B");
+        console.log(`A barbarian has appeared at ${spawn_point}!`);
+    }
+
+}
+
+
+function is_protected_by_fortress(map: Map, coordinates: Coordinates) {
+    let adjacent_tiles: Array<Coordinates> = neighboring_tiles(map, coordinates); 
+
+    for (let adj of adjacent_tiles){
+        if (get_property(map, adj) === "F"){
+            return true;
+        }
+    }
+    return false;
+}
+
+
+function spread_barbarian(map: Map): void {
+    let new_barbarians: Array<Coordinates> = [];
+
+    for(let y = 0; y < map.length; y++){
+        for(let x = 0; x < map[y].length; x++){
+
+            if (get_property(map, pair(x, y)) === "B") {
+                let adjacent_tiles: Array<Coordinates> = neighboring_tiles(map, pair(x, y));
+
+                if (adjacent_tiles.length > 0){
+                    let random_tile: Coordinates = adjacent_tiles[getRandomInt(adjacent_tiles.length)];
+                    let property: String = get_property(map, random_tile);
+                    if ((property === "E" || property === "H" || property === "C")
+                        && !is_protected_by_fortress(map, random_tile)) {
+                            new_barbarians.push(random_tile);
+                    }
+                }
+            }
+        }
+    }
+
+    for (let tile of new_barbarians) {
+        change_property(map, tile, "B");
+    }
+
+    if (new_barbarians.length > 0) {
+        console.log(`The barbarians have taken new territory!`)
+    }
+}
+
+function clear_adjacent_barbarians(map: Map, coordinates: Coordinates): void {
+    let adjacent_tiles = neighboring_tiles(map, coordinates); 
+
+    for (let adj of adjacent_tiles){
+        if (get_property(map, adj) === "B"){
+            change_property(map, adj, "E");
+        }
+    }
+}
+
+function upgrade_to_fortress(map: Map, coordinates: Coordinates, game_points: number): number {
+    if (game_points < 3){
+        console.log(` *** You have insufficient points to build a fortress! (3 points required) *** `);
+        return game_points;
+    }
+    if (get_property(map, coordinates) === "H") {
+        change_property(map, coordinates, "F"); //Konverterar house till fortress
+        clear_adjacent_barbarians(map, coordinates);
+        console.log(`You have built a Fortress at ${coordinates}! The surrounding barbarians are repelled.`)
+        return game_points - 3;
+    } else {
+        console.log(` *** You can only upgrade a house to a fortress! *** `)
+        return game_points;
+    }
+}
+
+
 
 //Returnerar True om byggnaden placerats, False om inte.
 function place(map: Map, coordinates: Coordinates, building: string): boolean {
@@ -159,6 +248,8 @@ function main(): void {
             
     const prompt = promptSync();
     const building_queue: Queue<string> = create_building_queue(3);
+
+    spawn_barbarian(game_map);
     
 
     while (game_running) {
@@ -167,16 +258,41 @@ function main(): void {
         console.log(`Day: ${game_turn}`)
         console.log(`Points: ${game_points}`)
         console.log(" ");
+
+        
         
         const current_building: string = head(building_queue);
     
         console.log(`Building to place: ${current_building}`);
 
+        const user_choice: string = prompt(`Do you want to (1) place a building or (2) upgrade a house to a fortress?`);
+        if (user_choice !== "1" && user_choice !== "2") { // Kan ej CTRL + C avsluta här av någon anledning... välj 1/2 sen avsluta isf.
+            console.log(" *** Invalid choice! *** ");
+            continue;
+        }
+
+        if(user_choice === "2") { // Väljer att uppgradera hus till Fortress.
+            const user_coordinates: string = prompt('Enter coordinate of house: ');
+            const [x, y]: Array<number> = user_coordinates.split(',').map(Number);
+            if (x < 0 || y < 0 || x >= size_x || y >= size_y || isNaN(x) || isNaN(y)) {
+                console.log(" *** Invalid coordinates, try again! *** ");
+                continue; 
+            }
+            
+            let new_game_points = upgrade_to_fortress(game_map, pair(x, y), game_points);
+            if (new_game_points !== game_points) { //Om man har 3 poäng
+                game_points = new_game_points;
+                continue; // Hoppa över att välja från building queue
+            } else {
+                continue; // Uppgradering misslyckas
+            }
+        }
+
         const user_coordinates: string = prompt('Enter coordinate of choosing: ');
         const [x, y]: Array<number> = user_coordinates.split(',').map(Number);
         if (x < 0 || y < 0 || x >= size_x || y >= size_y || isNaN(x) || isNaN(y)) {
             console.log(" *** Invalid coordinates, try again! *** ");
-            continue;
+            continue; 
         }
     
         
@@ -184,8 +300,6 @@ function main(): void {
             continue;
         }
         
-
-
         
         game_points = count_total_points(game_map);
         dequeue(building_queue);
@@ -193,7 +307,9 @@ function main(): void {
         
         enqueue(buildings[getRandomInt(buildings.length)], building_queue);
 
-        console.log(`-----------------------------------------`) // För synlighet i terminalen mellan dagar(turns)
+        spread_barbarian(game_map);
+
+        //console.log(`-----------------------------------------`) // För synlighet i terminalen mellan dagar(turns)
     }
 }
 
