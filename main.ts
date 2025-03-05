@@ -75,7 +75,7 @@ function merge_arrays(arr1: Array<Coordinates>, arr2: Array<Coordinates>): Array
 
 
     //Räknar totala poängen på kartan. Hus ger ett poäng för varje närliggande hus (så ett ensamt hus ger 0 poäng).
-function count_total_points(map: Map): number {
+export function count_total_points(map: Map): number {
     let points: number = 0;
     for (let y = 0; y < map.length; y++) {
         for (let x = 0; x < map[y].length; x++) { //nested loops, går igenom varje tile i kartan och räknar poängen.
