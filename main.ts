@@ -127,7 +127,7 @@ function create_building_queue(items: number): Queue<string> {
     return building_queue;
 }
 
-function spawn_barbarian(map: Map): void {
+export function spawn_barbarian(map: Map): void {
     let empty_tiles: Array<Coordinates> = [];
 
     for(let y = 0; y < map.length; y++){
@@ -147,7 +147,7 @@ function spawn_barbarian(map: Map): void {
 }
 
 
-function is_protected_by_fortress(map: Map, coordinates: Coordinates) {
+export function is_protected_by_fortress(map: Map, coordinates: Coordinates) {
     let adjacent_tiles: Array<Coordinates> = neighboring_tiles(map, coordinates); 
 
     for (let adj of adjacent_tiles){
@@ -218,7 +218,7 @@ function upgrade_to_fortress(map: Map, coordinates: Coordinates, game_points: nu
 
 
 //Returnerar True om byggnaden placerats, False om inte.
-function place(map: Map, coordinates: Coordinates, building: string): boolean {
+export function place(map: Map, coordinates: Coordinates, building: string): boolean {
     if (building === "Lumberjack") {
         if (get_property(map, coordinates) === "T") { //T för tree
             change_property(map, coordinates, "E");
@@ -318,4 +318,4 @@ function main(): void {
     }
 }
 
-main();
+//main();

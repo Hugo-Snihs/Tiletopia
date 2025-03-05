@@ -1,5 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.count_total_points = count_total_points;
+exports.spawn_barbarian = spawn_barbarian;
+exports.is_protected_by_fortress = is_protected_by_fortress;
+exports.place = place;
 /// <reference lib="es2015" /> 
 var maps_1 = require("./maps");
 var list_1 = require("./lib/list");
@@ -269,4 +273,4 @@ function main() {
         //console.log(`-----------------------------------------`) // För synlighet i terminalen mellan dagar(turns)
     }
 }
-main();
+//main();
