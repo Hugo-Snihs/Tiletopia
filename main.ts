@@ -8,8 +8,8 @@ import { is_empty, empty, enqueue, dequeue, head, Queue} from './lib/queue_array
 
 import * as promptSync from 'prompt-sync';
 
-const size_x: number = 5;
-const size_y: number = 5;
+const size_x: number = 10;
+const size_y: number = 10;
 const buildings: Array<string> = ["House", "Church", "Road", "Lumberjack"];
 
 function display_map(map: Map): void {
@@ -86,6 +86,9 @@ function count_total_points(map: Map): number {
             else if (current_property === "C") {
                 points += count_points_church(map, pair(x, y));
             }
+            else if (current_property === "F") {
+                points += count_points_fortress(map, pair(x, y));
+            }
             //Här kan vi lägga till fler else-if för fler eventuella byggnader som ger poäng.
         }
     }
@@ -96,7 +99,7 @@ function count_points_church(map: Map, [x, y]: Coordinates): number { //Räknar 
     const adjacent_cells: Array<Coordinates> = neighboring_tiles_including_roads(map, [x, y], new Set());
     let neighbors: number = 0;
         for (let neighbor of adjacent_cells) {
-            if (get_property(map, neighbor) === "H"){
+            if (get_property(map, neighbor) === "H" ||get_property(map, neighbor) === "F" ){
                 neighbors += 1;
             }
         }
@@ -106,7 +109,9 @@ function count_points_church(map: Map, [x, y]: Coordinates): number { //Räknar 
 function count_points_house(map: Map, [x, y]: Coordinates): number { //Hus ger ett poäng styck.
     return 1;
 }
-
+function count_points_fortress(map: Map, [x, y]: Coordinates): number { //Hus ger ett poäng styck.
+    return -2;
+}
 function getRandomInt(max: number): number {
     return Math.floor(Math.random() * max);
 }

@@ -5,8 +5,8 @@ var maps_1 = require("./maps");
 var list_1 = require("./lib/list");
 var queue_array_1 = require("./lib/queue_array");
 var promptSync = require("prompt-sync");
-var size_x = 5;
-var size_y = 5;
+var size_x = 10;
+var size_y = 10;
 var buildings = ["House", "Church", "Road", "Lumberjack"];
 function display_map(map) {
     for (var y = 0; y < map.length; y++) {
@@ -73,6 +73,9 @@ function count_total_points(map) {
             else if (current_property === "C") {
                 points += count_points_church(map, (0, list_1.pair)(x, y));
             }
+            else if (current_property === "F") {
+                points += count_points_fortress(map, (0, list_1.pair)(x, y));
+            }
             //Här kan vi lägga till fler else-if för fler eventuella byggnader som ger poäng.
         }
     }
@@ -84,7 +87,7 @@ function count_points_church(map, _a) {
     var neighbors = 0;
     for (var _i = 0, adjacent_cells_1 = adjacent_cells; _i < adjacent_cells_1.length; _i++) {
         var neighbor = adjacent_cells_1[_i];
-        if ((0, maps_1.get_property)(map, neighbor) === "H") {
+        if ((0, maps_1.get_property)(map, neighbor) === "H" || (0, maps_1.get_property)(map, neighbor) === "F") {
             neighbors += 1;
         }
     }
@@ -94,6 +97,10 @@ function count_points_church(map, _a) {
 function count_points_house(map, _a) {
     var x = _a[0], y = _a[1];
     return 1;
+}
+function count_points_fortress(map, _a) {
+    var x = _a[0], y = _a[1];
+    return -2;
 }
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
