@@ -5,8 +5,8 @@ var maps_1 = require("./maps");
 var list_1 = require("./lib/list");
 var queue_array_1 = require("./lib/queue_array");
 var promptSync = require("prompt-sync");
-var size_x = 10;
-var size_y = 10;
+var size_x = 7;
+var size_y = 7;
 var buildings = ["House", "Church", "Road", "Lumberjack"];
 function display_map(map) {
     for (var y = 0; y < map.length; y++) {
