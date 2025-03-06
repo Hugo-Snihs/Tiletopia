@@ -1,5 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.count_total_points = count_total_points;
+exports.spawn_barbarian = spawn_barbarian;
+exports.is_protected_by_fortress = is_protected_by_fortress;
+exports.place = place;
 /// <reference lib="es2015" /> 
 var maps_1 = require("./maps");
 var list_1 = require("./lib/list");
@@ -17,6 +21,8 @@ function display_map(map) {
         console.log(row);
     }
 }
+
+
 //hittar alla närliggande (ej diagonalt) tiles till en specifik tile. Räknar inte tiles utanför kartan. Returnerar en array med koordinaterna.
 function neighboring_tiles(map, _a) {
     var x = _a[0], y = _a[1];
@@ -269,4 +275,4 @@ function main() {
         //console.log(`-----------------------------------------`) // För synlighet i terminalen mellan dagar(turns)
     }
 }
-main();
+//main();
