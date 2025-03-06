@@ -159,7 +159,7 @@ export function is_protected_by_fortress(map: Map, coordinates: Coordinates) {
 }
 
 
-function spread_barbarian(map: Map): void {
+export function spread_barbarian(map: Map): void {
     let new_barbarians: Array<Coordinates> = [];
 
     for(let y = 0; y < map.length; y++){
@@ -199,7 +199,7 @@ function clear_adjacent_barbarians(map: Map, coordinates: Coordinates): void {
     }
 }
 
-function upgrade_to_fortress(map: Map, coordinates: Coordinates, game_points: number): number {
+export function upgrade_to_fortress(map: Map, coordinates: Coordinates, game_points: number): number {
     if (game_points < 3){
         console.log(` *** You have insufficient points to build a fortress! (3 points required) *** `);
         return game_points;

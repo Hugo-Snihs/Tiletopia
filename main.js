@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.count_total_points = count_total_points;
 exports.spawn_barbarian = spawn_barbarian;
 exports.is_protected_by_fortress = is_protected_by_fortress;
+exports.spread_barbarian = spread_barbarian;
+exports.upgrade_to_fortress = upgrade_to_fortress;
 exports.place = place;
 /// <reference lib="es2015" /> 
 var maps_1 = require("./maps");
