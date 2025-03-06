@@ -21,9 +21,13 @@ function display_map(map) {
         console.log(row);
     }
 }
-
-
-//hittar alla närliggande (ej diagonalt) tiles till en specifik tile. Räknar inte tiles utanför kartan. Returnerar en array med koordinaterna.
+/**
+ * Finds orthogonally adjacent (not diagonally adjacent) cells of a given cell.
+ * @param {Map} map - The map
+ * @param {Coordinates} [x,y] - The coordinates of the given cell.
+ * @returns {Array<Coordinates>} - An array of the adjacent coordinates (normally 4 coordinates, 3 if given cell is an edge and 2 if its a corner).
+ * @complexity - Theta(1)
+ */
 function neighboring_tiles(map, _a) {
     var x = _a[0], y = _a[1];
     var adjacent_tiles = [
@@ -31,11 +35,16 @@ function neighboring_tiles(map, _a) {
         x - 1 >= 0 ? (0, list_1.pair)(x - 1, y) : null,
         y + 1 < size_y ? (0, list_1.pair)(x, y + 1) : null,
         y - 1 >= 0 ? (0, list_1.pair)(x, y - 1) : null,
-    ].filter(function (n) { return n !== null; }); //Kollar så att närliggande tiles är inom gränserna av spelet,
-    //tar bort dem som ej är det(null).
+    ].filter(function (n) { return n !== null; }); //Removes cells outside of borders.
     return adjacent_tiles;
 }
-//Samma som neighboring_tiles men räknar även tiles som är sammankopplade med vägar (och vägarna själva).
+/**
+ * Same as neighbouring_tiles but counts tiles connected by roads (and the roads) as adjacent. Operates recurively, similar to DFS search.
+ * @param {Map} map - The map
+ * @param {Coordinates} [x,y] - The coordinates of the given cell.
+ * @returns {Array<Coordinates>} - An array of the adjacent coordinates.
+ * @complexity - O(size_x * size_y), worst case, if all tiles in the map are roads.
+ */
 function neighboring_tiles_including_roads(map, _a, visited) {
     var x = _a[0], y = _a[1];
     var adjacent_tiles = neighboring_tiles(map, [x, y]);
@@ -44,34 +53,38 @@ function neighboring_tiles_including_roads(map, _a, visited) {
             && !visited.has(adjacent_tiles[i].toString())) { //är vägar och ej besökta än.
             visited.add(adjacent_tiles[i].toString());
             adjacent_tiles = merge_arrays(adjacent_tiles, neighboring_tiles_including_roads(map, adjacent_tiles[i], visited));
-            //^^ Om tile A är granne med tile B, och tile B är en väg, så kommer tile A också vara granne med alla tiles som tile B är granne med.
         }
     }
     return adjacent_tiles;
 }
-//Sätter ihop två arrays och tar bort dubletter. Ordningen spelar ingen roll.
+//Merges two arrays of coordinates and removes duplicates, output array is in no particular order.
 function merge_arrays(arr1, arr2) {
     var length1 = arr1.length;
     var length2 = arr2.length;
-    for (var i = 0; i < length1; i++) { //Tar bort dubletter
+    for (var i = 0; i < length1; i++) { //removes duplicates
         for (var j = 0; j < length2; j++) {
             if (arr1[i].toString() === arr2[j].toString()) {
-                arr2[j] = (0, list_1.pair)(-1, -1); //gör dubletter till en ogiltig koordinat i arr2
+                arr2[j] = (0, list_1.pair)(-1, -1); //Sets duplicates to an unvalid coordinate.
             }
         }
     }
-    for (var i = 0; i < length2; i++) { //Lägger till giltiga element från arr2 till arr1
+    for (var i = 0; i < length2; i++) { //Adds valid coordinates from arr2 to arr1
         if (arr2[i].toString() !== (0, list_1.pair)(-1, -1).toString()) {
             arr1.push(arr2[i]);
         }
     }
     return arr1;
 }
-//Räknar totala poängen på kartan. Hus ger ett poäng för varje närliggande hus (så ett ensamt hus ger 0 poäng).
+/**
+ * Counts total score on a map
+ * @param {Map} map - The map to count score for.
+ * @returns {number} - The score.
+ * @complexity O(n^2) where n is number of cells. This is worst case if map is filled with churches and roads. Normally it's Theta(n)
+ */
 function count_total_points(map) {
     var points = 0;
     for (var y = 0; y < map.length; y++) {
-        for (var x = 0; x < map[y].length; x++) { //nested loops, går igenom varje tile i kartan och räknar poängen.
+        for (var x = 0; x < map[y].length; x++) { //nested loops, goes through the map and counts the points on each cell.
             var current_property = (0, maps_1.get_property)(map, (0, list_1.pair)(x, y));
             if (current_property === "H") {
                 points += count_points_house(map, (0, list_1.pair)(x, y));
@@ -82,11 +95,12 @@ function count_total_points(map) {
             else if (current_property === "F") {
                 points += count_points_fortress(map, (0, list_1.pair)(x, y));
             }
-            //Här kan vi lägga till fler else-if för fler eventuella byggnader som ger poäng.
+            //Add more else-if statements here if we want more buildings that gives points.
         }
     }
     return points;
 }
+//Counts points given by a specific church. Gives one point for each adjacent house or fortress (adjacent through roads count).
 function count_points_church(map, _a) {
     var x = _a[0], y = _a[1];
     var adjacent_cells = neighboring_tiles_including_roads(map, [x, y], new Set());
@@ -111,7 +125,6 @@ function count_points_fortress(map, _a) {
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
-//Skapar en kö med byggnader som spelaren kan placera ut. Vi kan implementera en slumpgenererad kö här istället.
 function create_building_queue(items) {
     var building_queue = (0, queue_array_1.empty)();
     for (var i = 0; i < items; i++) {
@@ -194,10 +207,18 @@ function upgrade_to_fortress(map, coordinates, game_points) {
         return game_points;
     }
 }
-//Returnerar True om byggnaden placerats, False om inte.
+/**
+ * Places (if possible) a building on a cell.
+ * @param {Map} map - The map to place on.
+ * @param {Coordintaes} coordinates - The coordinates to place building on.
+ * @param {str} building - The building to place.
+ * @returns {boolean} - True if placement went through, false otherwise.
+ * @precondition - Str must be a valid building in the game.
+ * @complexity Theta(1)
+ */
 function place(map, coordinates, building) {
     if (building === "Lumberjack") {
-        if ((0, maps_1.get_property)(map, coordinates) === "T") { //T för tree
+        if ((0, maps_1.get_property)(map, coordinates) === "T") {
             (0, maps_1.change_property)(map, coordinates, "E");
             console.log("You used a lumberjack to remove trees at coordinates ".concat(coordinates, "!"));
             return true;
@@ -221,6 +242,9 @@ function place(map, coordinates, building) {
         return false;
     }
 }
+/**
+ * The main function containing the user input loop. Creates a map, counts points, handles player inputs.
+ */
 function main() {
     var game_map = (0, maps_1.create_map)(size_x, size_y);
     var game_running = true;
