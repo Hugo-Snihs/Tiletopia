@@ -2,6 +2,7 @@ This is the game "Tiletopia". You are presented with a gridmap of tiles, having 
 Your task is to build houses, churches and roads that connects these to one another. For each connection, you get points and upgrade the houses to Fortress in order to repell the barbarians.
 
 What do install:
+
 0. npm install -g typescript (For mac: sudo npm install -g typescript)
 1. git clone
 2. npm install promptSync
