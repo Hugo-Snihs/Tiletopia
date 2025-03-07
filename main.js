@@ -301,4 +301,4 @@ function main() {
         //console.log(`-----------------------------------------`) // För synlighet i terminalen mellan dagar(turns)
     }
 }
-//main();
+main();

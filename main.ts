@@ -12,6 +12,7 @@ const size_x: number = 7;
 const size_y: number = 7;
 const buildings: Array<string> = ["House", "Church", "Road", "Lumberjack"];
 
+//Displays map.
 function display_map(map: Map): void {
     for (let y = 0; y < map.length; y++) {
         let row = "";
@@ -49,6 +50,7 @@ function neighboring_tiles(map: Map, [x, y]: Coordinates): Array<Coordinates> {
 function neighboring_tiles_including_roads(map: Map 
                                             , [x, y]: Coordinates
                                             , visited: Set<String>): Array<Coordinates> {
+    //variant: Number of unvisited roads.
     let adjacent_tiles = neighboring_tiles(map, [x, y]);
     for (let i = 0; i < adjacent_tiles.length; i++) { //går igenom alla närliggande tiles och kollar om de är vägar.
         if (get_property(map, adjacent_tiles[i])  === "R" 
@@ -134,7 +136,11 @@ function getRandomInt(max: number): number { //Returns a random whole number bet
     return Math.floor(Math.random() * max);
 }
 
-
+/**
+ * Function that creates an queue of given length(items), consisting of buildings chosen in random order.
+ * @param {items} number - Number of building.
+ * @returns {Queue} - If tiles are protected or not.
+ */
 function create_building_queue(items: number): Queue<string> {
     const building_queue = empty<string>(); 
 
@@ -144,7 +150,10 @@ function create_building_queue(items: number): Queue<string> {
     
     return building_queue;
 }
-
+/**
+ * Function that chooses a empty tile at random to spawn a barbarian on.
+ * @param {Map} map - The map.
+ */
 export function spawn_barbarian(map: Map): void {
     let empty_tiles: Array<Coordinates> = [];
 
@@ -164,8 +173,14 @@ export function spawn_barbarian(map: Map): void {
 
 }
 
-
-export function is_protected_by_fortress(map: Map, coordinates: Coordinates) {
+/**
+ * Function that checks adjacent tiles of a fortress to determine availability of barbarian conquest.
+ * @param {Map} map - The map.
+ * @param {Coordinates} coordinates - the coordinates to check adjacent tiles of.
+ * @returns {boolean} - If tiles are protected or not.
+ * @precondition - Integer coordinates.
+ */
+export function is_protected_by_fortress(map: Map, coordinates: Coordinates): boolean {
     let adjacent_tiles: Array<Coordinates> = neighboring_tiles(map, coordinates); 
 
     for (let adj of adjacent_tiles){
@@ -176,7 +191,12 @@ export function is_protected_by_fortress(map: Map, coordinates: Coordinates) {
     return false;
 }
 
-
+/**
+ * Function that checks adjacent tiles, and choses one of those 4 tiles to conquer 
+ * (unless protected by fortress or is tree). 
+ * @param {Map} map - The map.
+ * @precondition - Map tiles are non-negative.
+ */
 export function spread_barbarian(map: Map): void {
     let new_barbarians: Array<Coordinates> = [];
 
@@ -207,20 +227,27 @@ export function spread_barbarian(map: Map): void {
     }
 }
 
-function clear_adjacent_barbarians(map: Map, coordinates: Coordinates): void {
-    let adjacent_tiles = neighboring_tiles(map, coordinates); 
-
-    for (let adj of adjacent_tiles){
-        if (get_property(map, adj) === "B"){
-            change_property(map, adj, "E");
-        }
-    }
-}
-
+/**
+ * Upgrades (if game_points > 3) a House into a Fortess, deducts 3 points from game_points.
+ * @param {Map} map - The map.
+ * @param {Coordintaes} coordinates - The coordinates that has a house on it, to upgrade into fortress.
+ * @returns {number} - The total points that the player has after upgrading.
+ * @precondition - Map tiles are non-negative.
+ */
 export function upgrade_to_fortress(map: Map, coordinates: Coordinates, game_points: number): number {
     if (game_points < 3){
         console.log(` *** You have insufficient points to build a fortress! (3 points required) *** `);
         return game_points;
+    }
+    //Helper function that makes adjacent tilees into empty ones, if they are barbarians.
+    function clear_adjacent_barbarians(map: Map, coordinates: Coordinates): void {
+        let adjacent_tiles = neighboring_tiles(map, coordinates); 
+    
+        for (let adj of adjacent_tiles){
+            if (get_property(map, adj) === "B"){
+                change_property(map, adj, "E");
+            }
+        }
     }
     if (get_property(map, coordinates) === "H") {
         change_property(map, coordinates, "F"); //Konverterar house till fortress
