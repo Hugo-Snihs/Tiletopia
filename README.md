@@ -6,6 +6,6 @@ What to write in terminal:
 1. git clone https://github.com/Hugo-Snihs/Tiletopia.git
 2. npm install -g typescript (For mac: sudo npm install -g typescript)
 3. npm install promptSync
-4. tsc --strict main.ts; node main.js
+4. tsc --strict main.ts; node main.js (Make sure function call to main() at bottom of main.ts is not commented out).
 
 Enjoy!
