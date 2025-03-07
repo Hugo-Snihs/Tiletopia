@@ -6,6 +6,7 @@ What do install:
 0. npm install -g typescript (For mac: sudo npm install -g typescript)
 1. git clone https://github.com/Hugo-Snihs/Tiletopia.git
 2. npm install promptSync
-3. tsc --strict main.ts; node main.js
+3. npm install --global
+4. tsc --strict main.ts; node main.js
 
 Enjoy!
