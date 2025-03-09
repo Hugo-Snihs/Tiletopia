@@ -14,6 +14,7 @@ var promptSync = require("prompt-sync");
 var size_x = 7;
 var size_y = 7;
 var buildings = ["House", "Church", "Road", "Lumberjack"];
+//Displays map.
 function display_map(map) {
     for (var y = 0; y < map.length; y++) {
         var row = "";
@@ -49,6 +50,7 @@ function neighboring_tiles(map, _a) {
  */
 function neighboring_tiles_including_roads(map, _a, visited) {
     var x = _a[0], y = _a[1];
+    //variant: Number of unvisited roads.
     var adjacent_tiles = neighboring_tiles(map, [x, y]);
     for (var i = 0; i < adjacent_tiles.length; i++) { //går igenom alla närliggande tiles och kollar om de är vägar.
         if ((0, maps_1.get_property)(map, adjacent_tiles[i]) === "R"
@@ -127,6 +129,11 @@ function count_points_fortress(map, _a) {
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
+/**
+ * Function that creates an queue of given length(items), consisting of buildings chosen in random order.
+ * @param {items} number - Number of building.
+ * @returns {Queue} - If tiles are protected or not.
+ */
 function create_building_queue(items) {
     var building_queue = (0, queue_array_1.empty)();
     for (var i = 0; i < items; i++) {
@@ -134,6 +141,10 @@ function create_building_queue(items) {
     }
     return building_queue;
 }
+/**
+ * Function that chooses a empty tile at random to spawn a barbarian on.
+ * @param {Map} map - The map.
+ */
 function spawn_barbarian(map) {
     var empty_tiles = [];
     for (var y = 0; y < map.length; y++) {
@@ -149,6 +160,13 @@ function spawn_barbarian(map) {
         console.log("A barbarian has appeared at ".concat(spawn_point, "!"));
     }
 }
+/**
+ * Function that checks adjacent tiles of a fortress to determine availability of barbarian conquest.
+ * @param {Map} map - The map.
+ * @param {Coordinates} coordinates - the coordinates to check adjacent tiles of.
+ * @returns {boolean} - If tiles are protected or not.
+ * @precondition - Integer coordinates.
+ */
 function is_protected_by_fortress(map, coordinates) {
     var adjacent_tiles = neighboring_tiles(map, coordinates);
     for (var _i = 0, adjacent_tiles_1 = adjacent_tiles; _i < adjacent_tiles_1.length; _i++) {
@@ -159,6 +177,12 @@ function is_protected_by_fortress(map, coordinates) {
     }
     return false;
 }
+/**
+ * Function that checks adjacent tiles, and choses one of those 4 tiles to conquer
+ * (unless protected by fortress or is tree).
+ * @param {Map} map - The map.
+ * @precondition - Map tiles are non-negative.
+ */
 function spread_barbarian(map) {
     var new_barbarians = [];
     for (var y = 0; y < map.length; y++) {
@@ -184,19 +208,27 @@ function spread_barbarian(map) {
         console.log("The barbarians have taken new territory!");
     }
 }
-function clear_adjacent_barbarians(map, coordinates) {
-    var adjacent_tiles = neighboring_tiles(map, coordinates);
-    for (var _i = 0, adjacent_tiles_2 = adjacent_tiles; _i < adjacent_tiles_2.length; _i++) {
-        var adj = adjacent_tiles_2[_i];
-        if ((0, maps_1.get_property)(map, adj) === "B") {
-            (0, maps_1.change_property)(map, adj, "E");
-        }
-    }
-}
+/**
+ * Upgrades (if game_points > 3) a House into a Fortess, deducts 3 points from game_points.
+ * @param {Map} map - The map.
+ * @param {Coordintaes} coordinates - The coordinates that has a house on it, to upgrade into fortress.
+ * @returns {number} - The total points that the player has after upgrading.
+ * @precondition - Map tiles are non-negative.
+ */
 function upgrade_to_fortress(map, coordinates, game_points) {
     if (game_points < 3) {
         console.log(" *** You have insufficient points to build a fortress! (3 points required) *** ");
         return game_points;
+    }
+    //Helper function that makes adjacent tilees into empty ones, if they are barbarians.
+    function clear_adjacent_barbarians(map, coordinates) {
+        var adjacent_tiles = neighboring_tiles(map, coordinates);
+        for (var _i = 0, adjacent_tiles_2 = adjacent_tiles; _i < adjacent_tiles_2.length; _i++) {
+            var adj = adjacent_tiles_2[_i];
+            if ((0, maps_1.get_property)(map, adj) === "B") {
+                (0, maps_1.change_property)(map, adj, "E");
+            }
+        }
     }
     if ((0, maps_1.get_property)(map, coordinates) === "H") {
         (0, maps_1.change_property)(map, coordinates, "F"); //Konverterar house till fortress
@@ -249,11 +281,29 @@ function place(map, coordinates, building) {
  */
 function main() {
     var game_map = (0, maps_1.create_map)(size_x, size_y);
-    var game_running = true;
+    var game_running = false;
     var game_turn = 0;
     var game_points = 0;
     var prompt = promptSync();
     var building_queue = create_building_queue(3);
+    while (!game_running) {
+        console.log("Welcome to Tiletopia!");
+        console.log("Start Game (1)\nTutorial (2)");
+        var user_choice = prompt("");
+        if (user_choice !== "1" && user_choice !== "2") {
+            console.log(" *** Invalid choice! *** ");
+            continue;
+        }
+        else if (user_choice === "1") {
+            game_running = true;
+        }
+        else if (user_choice === "2") {
+            console.log("\nTiletopia is a turn-based game in which the goal is to score as high of a number of points by the end of the game. \nThe number of turns are measured in days and is together with points displayed to the player. \nEvery day, the player must place a randomly selected building or item on the map. The player does so by writing the wanted coordinates with the syntax: x, y. \nBut beware, sinister barbarians are planning an invasion and if left unchecked, will overrun your village!");
+            console.log("\nThe building you will be able to place each day is randomised, they are the following:\nHouse (H). Placing a House will give you one point. A House can be upgraded to a Fortress at the cost of 3 points.\nChurch (C). Placing a Church will not give you any points by default, however for each adjacent House or Fortress the Church provides one point.\nRoad (R). Placing a Road does not provide you with any points, however if you connect a House or Fortress and a Church with a Road they will count as adjacent for points.\nLumberjack. Placing a Lumberjack on a Trees (T) tile will remove the Trees, allowing you to build there. After removing the Trees, the Lumberjack disappears.");
+            console.log("\nPress any button to continue.");
+            var user_choice_1 = prompt("");
+        }
+    }
     spawn_barbarian(game_map);
     while (game_running) {
         console.log(" ");
