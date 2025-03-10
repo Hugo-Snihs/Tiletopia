@@ -11,8 +11,8 @@ var maps_1 = require("./maps");
 var list_1 = require("./lib/list");
 var queue_array_1 = require("./lib/queue_array");
 var promptSync = require("prompt-sync");
-var size_x = 7;
-var size_y = 7;
+var size_x = 5;
+var size_y = 5;
 var buildings = ["House", "Church", "Road", "Lumberjack"];
 //Displays map.
 function display_map(map) {
@@ -333,4 +333,4 @@ function main() {
         //console.log(`-----------------------------------------`) // För synlighet i terminalen mellan dagar(turns)
     }
 }
-//main();
+main();

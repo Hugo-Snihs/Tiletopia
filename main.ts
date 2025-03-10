@@ -8,8 +8,8 @@ import { is_empty, empty, enqueue, dequeue, head, Queue} from './lib/queue_array
 
 import * as promptSync from 'prompt-sync';
 
-const size_x: number = 7;
-const size_y: number = 7;
+const size_x: number = 5;
+const size_y: number = 5;
 const buildings: Array<string> = ["House", "Church", "Road", "Lumberjack"];
 
 //Displays map.
