@@ -302,16 +302,33 @@ export function place(map: Map, coordinates: Coordinates, building: string): boo
  */
 function main(): void {
     let game_map: Map = create_map(size_x, size_y);
-    let game_running: boolean = true;
+    let game_running: boolean = false;
     let game_turn: number = 0;
     let game_points: number = 0;
             
     const prompt = promptSync();
     const building_queue: Queue<string> = create_building_queue(3);
 
-    spawn_barbarian(game_map);
-    
+    while (!game_running) {
+        console.log(`Welcome to Tiletopia!`)
+        console.log(`Start Game (1)\nTutorial (2)`)
+        const user_choice: string = prompt(``) 
+        if (user_choice !== "1" && user_choice !== "2") {
+            console.log(" *** Invalid choice! *** ");
+            continue;
+        }
+        else if (user_choice === "1") {
+            game_running = true;
+        }
+        else if (user_choice === "2") {
+            console.log(`\nTiletopia is a turn-based game in which the goal is to score as high of a number of points by the end of the game. \nThe number of turns are measured in days and is together with points displayed to the player. \nEvery day, the player must place a randomly selected building or item on the map. The player does so by writing the wanted coordinates with the syntax: x, y. \nBut beware, sinister barbarians are planning an invasion and if left unchecked, will overrun your village!`)
+            console.log(`\nThe building you will be able to place each day is randomised, they are the following:\nHouse (H). Placing a House will give you one point. A House can be upgraded to a Fortress at the cost of 3 points.\nChurch (C). Placing a Church will not give you any points by default, however for each adjacent House or Fortress the Church provides one point.\nRoad (R). Placing a Road does not provide you with any points, however if you connect a House or Fortress and a Church with a Road they will count as adjacent for points.\nLumberjack. Placing a Lumberjack on a Trees (T) tile will remove the Trees, allowing you to build there. After removing the Trees, the Lumberjack disappears.`)
+            console.log(`\nPress any button to continue.`)
+            const user_choice: string = prompt(``)
+        }
+    }
 
+    spawn_barbarian(game_map);
     while (game_running) {
         console.log(" ");
         display_map(game_map);
@@ -373,4 +390,4 @@ function main(): void {
     }
 }
 
-//main();
+main();
