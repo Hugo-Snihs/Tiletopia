@@ -207,7 +207,8 @@ export function spread_barbarian(map: Map): void {
                 let adjacent_tiles: Array<Coordinates> = neighboring_tiles(map, pair(x, y));
 
                 if (adjacent_tiles.length > 0){
-                    let random_tile: Coordinates = adjacent_tiles[getRandomInt(adjacent_tiles.length)];
+                    let random_tile: Coordinates = 
+                        adjacent_tiles[getRandomInt(adjacent_tiles.length)];
                     let property: String = get_property(map, random_tile);
                     if ((property === "E" || property === "H" || property === "C")
                         && !is_protected_by_fortress(map, random_tile)) {
@@ -321,8 +322,18 @@ function main(): void {
             game_running = true;
         }
         else if (user_choice === "2") {
-            console.log(`\nTiletopia is a turn-based game in which the goal is to score as high of a number of points by the end of the game. \nThe number of turns are measured in days and is together with points displayed to the player. \nEvery day, the player must place a randomly selected building or item on the map. The player does so by writing the wanted coordinates with the syntax: x, y. \nBut beware, sinister barbarians are planning an invasion and if left unchecked, will overrun your village!`)
-            console.log(`\nThe building you will be able to place each day is randomised, they are the following:\nHouse (H). Placing a House will give you one point. A House can be upgraded to a Fortress at the cost of 3 points.\nChurch (C). Placing a Church will not give you any points by default, however for each adjacent House or Fortress the Church provides one point.\nRoad (R). Placing a Road does not provide you with any points, however if you connect a House or Fortress and a Church with a Road they will count as adjacent for points.\nLumberjack. Placing a Lumberjack on a Trees (T) tile will remove the Trees, allowing you to build there. After removing the Trees, the Lumberjack disappears.`)
+            console.log(`\nTiletopia is a turn-based game in which the goal is to score as high of a number of points by the end of the game. \n
+                           The number of turns are measured in days and is together with points displayed to the player. \n
+                           Every day, the player must place a randomly selected building or item on the map. 
+                           The player does so by writing the wanted coordinates with the syntax: x, y. \n
+                           But beware, sinister barbarians are planning an invasion and if left unchecked, will overrun your village!`)
+            console.log(`\nThe building you will be able to place each day is randomised, they are the following:\n
+                           House (H). Placing a House will give you one point. A House can be upgraded to a Fortress at the cost of 3 points.\n
+                           Church (C). Placing a Church will not give you any points by default, however for each adjacent House or Fortress the Church provides one point.\n
+                           Road (R). Placing a Road does not provide you with any points, 
+                           however if you connect a House or Fortress and a Church with a Road they will count as adjacent for points.\n
+                           Lumberjack. Placing a Lumberjack on a Trees (T) tile will remove the Trees, allowing you to build there. 
+                           After removing the Trees, the Lumberjack disappears.`)
             console.log(`\nPress any button to continue.`)
             const user_choice: string = prompt(``)
         }
@@ -390,4 +401,4 @@ function main(): void {
     }
 }
 
-main();
+//main();
